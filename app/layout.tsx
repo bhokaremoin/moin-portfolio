@@ -55,7 +55,7 @@ export default async function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider initialTheme={initialTheme}>
           <a href="#main" className="skip-link">
             Skip to main content
