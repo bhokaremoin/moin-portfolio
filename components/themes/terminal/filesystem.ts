@@ -1,0 +1,42 @@
+export const TB_FS: Record<string, string> = {
+  "about.md": [
+    "MOIN BHOKARE",
+    "============",
+    "",
+    "Full-stack developer based in Pune, India.",
+    "Currently shipping developer tools at BrowserStack.",
+    "Previously: SDE at SuperAGI (intern → full-time conversion).",
+    "B.Tech CS, IIIT Pune (2020-2024).",
+    "",
+    "I like small sharp tools, well-placed Dockerfiles, and",
+    "the satisfaction of deleting code that used to be load-bearing.",
+  ].join("\n"),
+  "skills.txt": [
+    "Languages : TypeScript, JavaScript, Java, C++, Python",
+    "Frontend  : React, Next.js, modern CSS",
+    "Backend   : Node.js, Spring Boot, Microservices",
+    "Data      : MongoDB, MySQL, Firebase",
+    "Infra     : Docker, AWS, GCP, Linux",
+    "Currently : LLMs, agent infra, distributed systems",
+  ].join("\n"),
+  "projects.md": [
+    "01. GPTForVideo            [JS · GPT-4 · FFmpeg]",
+    "    GPT-powered video summary + chaptering pipeline.",
+    "",
+    "02. DevUtility             [TS · React · Vite]",
+    "    30+ offline dev tools, local-first, keyboard-driven.",
+    "",
+    "03. Adaptive Traffic Signal [Python · OpenCV · ML]",
+    "    CV-based real-time green-time allocator (capstone).",
+  ].join("\n"),
+  "contact.json": JSON.stringify(
+    {
+      email: "bhokaremoin@gmail.com",
+      phone: "+91 8007704944",
+      github: "github.com/bhokaremoin",
+      linkedin: "linkedin.com/in/moinbhokare",
+    },
+    null,
+    2,
+  ),
+};
