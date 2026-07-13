@@ -110,7 +110,7 @@ function ExecutiveNav() {
       style={{
         display: "flex",
         alignItems: "center",
-        padding: "22px 64px",
+        padding: "22px 210px 22px 64px",
         borderBottom: "1px solid var(--line-soft)",
         background: "var(--bg)",
         position: "sticky",
