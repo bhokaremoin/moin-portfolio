@@ -10,12 +10,14 @@ import {
   useState,
 } from "react";
 import { useTheme } from "@/components/theme-provider";
-import { isThemeId } from "@/lib/portfolio-data";
+import { isThemeId, profile } from "@/lib/portfolio-data";
 import {
   COLOR_VAR,
   TerminalLine,
   tbExecute,
 } from "./commands";
+import { CommandChips } from "./command-chips";
+import { ASCII_MOIN } from "./ascii";
 
 interface HistoryItem {
   kind: "sys" | "cmd" | "out";
@@ -25,13 +27,24 @@ interface HistoryItem {
 
 const MAX_SCROLLBACK = 200;
 const MAX_HISTORY = 50;
-const INTRO: HistoryItem = {
-  kind: "sys",
-  lines: [
-    { color: "accent", text: "moin-shell v1.0 — type 'help' to begin" },
-    { color: "dim", text: "try: whoami, ls, cat about.md, projects, neofetch" },
-  ],
-};
+
+function makeIntro(): HistoryItem[] {
+  const bannerLines: TerminalLine[] = ASCII_MOIN.split("\n").map((t) => ({
+    color: "accent" as const,
+    text: t,
+  }));
+  return [
+    {
+      kind: "sys",
+      lines: [
+        ...bannerLines,
+        { color: "dim", text: "" },
+        { color: "ink", text: `${profile.shortRole} · ${profile.location}` },
+        { color: "dim", text: "type 'help' or tap a command below" },
+      ],
+    },
+  ];
+}
 
 function trim(items: HistoryItem[]): HistoryItem[] {
   if (items.length <= MAX_SCROLLBACK) return items;
@@ -40,12 +53,13 @@ function trim(items: HistoryItem[]): HistoryItem[] {
 
 export function TerminalShell() {
   const { setTheme } = useTheme();
-  const [history, setHistory] = useState<HistoryItem[]>([INTRO]);
+  const [history, setHistory] = useState<HistoryItem[]>(makeIntro);
   const [input, setInput] = useState("");
   const [past, setPast] = useState<string[]>([]);
   const [pi, setPi] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const downloadRef = useRef<HTMLAnchorElement>(null);
   const labelId = useId();
 
   useLayoutEffect(() => {
@@ -83,31 +97,53 @@ export function TerminalShell() {
     [setTheme],
   );
 
+  const run = useCallback(
+    (raw: string) => {
+      const trimmed = raw.trim();
+      const cmdItem: HistoryItem = { kind: "cmd", input: raw };
+
+      if (trimmed.startsWith("theme")) {
+        const target = trimmed.replace(/^theme\s*/, "").trim();
+        const out = handleThemeCommand(target);
+        setHistory((h) => trim([...h, cmdItem, out]));
+      } else {
+        const result = tbExecute(raw);
+        if (result.kind === "clear") {
+          setHistory([]);
+        } else if (result.kind === "download") {
+          setHistory((h) =>
+            trim([...h, cmdItem, { kind: "out", lines: result.lines }]),
+          );
+          // Trigger download via hidden anchor (guard for jsdom which lacks navigation)
+          try {
+            if (downloadRef.current) {
+              downloadRef.current.href = result.href;
+              downloadRef.current.click();
+            } else if (typeof window !== "undefined" && window.location) {
+              window.location.assign(result.href);
+            }
+          } catch {
+            // jsdom or restricted env — silently skip
+          }
+        } else {
+          setHistory((h) =>
+            trim([...h, cmdItem, { kind: "out", lines: result.lines }]),
+          );
+        }
+      }
+
+      if (trimmed) {
+        setPast((p) => [trimmed, ...p].slice(0, MAX_HISTORY));
+      }
+      setPi(-1);
+      setInput("");
+    },
+    [handleThemeCommand],
+  );
+
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const raw = input;
-    const trimmed = raw.trim();
-
-    if (trimmed.startsWith("theme")) {
-      const target = trimmed.replace(/^theme\s*/, "").trim();
-      const out = handleThemeCommand(target);
-      setHistory((h) => trim([...h, { kind: "cmd", input: raw }, out]));
-    } else {
-      const out = tbExecute(raw);
-      if (out.kind === "clear") {
-        setHistory([]);
-      } else {
-        setHistory((h) =>
-          trim([...h, { kind: "cmd", input: raw }, { kind: "out", lines: out.lines }]),
-        );
-      }
-    }
-
-    if (trimmed) {
-      setPast((p) => [trimmed, ...p].slice(0, MAX_HISTORY));
-    }
-    setPi(-1);
-    setInput("");
+    run(input);
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -132,15 +168,26 @@ export function TerminalShell() {
   };
 
   return (
-    <section aria-label="Interactive shell">
+    <section
+      aria-label="Interactive shell"
+      style={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
+      {/* Hidden anchor for programmatic downloads */}
+      <a ref={downloadRef} download aria-hidden style={{ display: "none" }} />
+
       <div
         onClick={() => inputRef.current?.focus()}
         style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minHeight: 0,
           border: "1px solid var(--line)",
           background: "#03060a",
           cursor: "text",
         }}
       >
+        {/* Title bar */}
         <div
           style={{
             display: "flex",
@@ -151,6 +198,7 @@ export function TerminalShell() {
             fontSize: 11,
             color: "var(--dim)",
             fontFamily: "var(--font-mono)",
+            flexShrink: 0,
           }}
         >
           <span style={{ width: 8, height: 8, borderRadius: 4, background: "#ff5f56" }} aria-hidden />
@@ -160,6 +208,7 @@ export function TerminalShell() {
           <span style={{ marginLeft: "auto", color: "var(--accent)" }}>● live</span>
         </div>
 
+        {/* Scrollback */}
         <div
           ref={scrollRef}
           role="log"
@@ -167,7 +216,8 @@ export function TerminalShell() {
           aria-atomic="false"
           aria-label="Terminal output"
           style={{
-            height: 360,
+            flex: 1,
+            minHeight: 0,
             overflow: "auto",
             padding: "14px 18px 0",
             fontFamily: "var(--font-mono)",
@@ -187,17 +237,38 @@ export function TerminalShell() {
                 </div>
               );
             }
-            return (h.lines ?? []).map((ln, j) => (
-              <div
-                key={`${i}-${j}`}
-                style={{ color: COLOR_VAR[ln.color], whiteSpace: "pre" }}
-              >
-                {ln.text}
-              </div>
-            ));
+            return (h.lines ?? []).map((ln, j) =>
+              ln.href ? (
+                <div
+                  key={`${i}-${j}`}
+                  style={{ color: COLOR_VAR[ln.color], whiteSpace: "pre" }}
+                >
+                  <a
+                    href={ln.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    style={{
+                      color: "inherit",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 2,
+                    }}
+                  >
+                    {ln.text}
+                  </a>
+                </div>
+              ) : (
+                <div
+                  key={`${i}-${j}`}
+                  style={{ color: COLOR_VAR[ln.color], whiteSpace: "pre" }}
+                >
+                  {ln.text}
+                </div>
+              ),
+            );
           })}
         </div>
 
+        {/* Input row */}
         <form
           onSubmit={submit}
           style={{
@@ -207,6 +278,7 @@ export function TerminalShell() {
             fontFamily: "var(--font-mono)",
             fontSize: 13,
             lineHeight: 1.7,
+            flexShrink: 0,
           }}
         >
           <label htmlFor={labelId} className="sr-only">
@@ -236,6 +308,9 @@ export function TerminalShell() {
             }}
           />
         </form>
+
+        {/* Command chips */}
+        <CommandChips onRun={run} />
       </div>
     </section>
   );

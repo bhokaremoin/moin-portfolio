@@ -5,17 +5,9 @@ import {
   projects,
 } from "@/lib/portfolio-data";
 import { TerminalShell } from "./shell";
+import { ASCII_MOIN } from "./ascii";
 
 const mono = "var(--font-mono)";
-
-const ASCII_MOIN = [
-  "███╗   ███╗  ██████╗  ██╗ ███╗   ██╗",
-  "████╗ ████║ ██╔═══██╗ ██║ ████╗  ██║",
-  "██╔████╔██║ ██║   ██║ ██║ ██╔██╗ ██║",
-  "██║╚██╔╝██║ ██║   ██║ ██║ ██║╚██╗██║",
-  "██║ ╚═╝ ██║ ╚██████╔╝ ██║ ██║ ╚████║",
-  "╚═╝     ╚═╝  ╚═════╝  ╚═╝ ╚═╝  ╚═══╝",
-].join("\n");
 
 function PromptLine({ children, prompt = "$" }: { children: React.ReactNode; prompt?: string }) {
   return (
