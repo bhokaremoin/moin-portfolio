@@ -1,3 +1,5 @@
+import { certifications } from "@/lib/portfolio-data";
+
 export const TB_FS: Record<string, string> = {
   "about.md": [
     "MOIN BHOKARE",
@@ -29,6 +31,9 @@ export const TB_FS: Record<string, string> = {
     "03. Adaptive Traffic Signal [Python · OpenCV · ML]",
     "    CV-based real-time green-time allocator (capstone).",
   ].join("\n"),
+  "certs.txt": certifications
+    .map((c) => `✓ ${c.title} — ${c.issuer} (${c.year})`)
+    .join("\n"),
   "contact.json": JSON.stringify(
     {
       email: "bhokaremoin@gmail.com",

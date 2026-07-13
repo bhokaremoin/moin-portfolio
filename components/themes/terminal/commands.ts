@@ -1,15 +1,18 @@
 import { TB_FS } from "./filesystem";
+import { projects, profile } from "@/lib/portfolio-data";
 
 export type TerminalColor = "ink" | "accent" | "amber" | "cyan" | "mag" | "dim";
 
 export interface TerminalLine {
   color: TerminalColor;
   text: string;
+  href?: string;
 }
 
 export type CommandResult =
   | { kind: "lines"; lines: readonly TerminalLine[] }
-  | { kind: "clear" };
+  | { kind: "clear" }
+  | { kind: "download"; href: string; lines: readonly TerminalLine[] };
 
 const lines = (...items: TerminalLine[]): CommandResult => ({
   kind: "lines",
@@ -22,6 +25,11 @@ const amber = (text: string): TerminalLine => ({ color: "amber", text });
 const cyan = (text: string): TerminalLine => ({ color: "cyan", text });
 const mag = (text: string): TerminalLine => ({ color: "mag", text });
 const dim = (text: string): TerminalLine => ({ color: "dim", text });
+const link = (text: string, href: string, color: TerminalColor = "ink"): TerminalLine => ({
+  color,
+  text,
+  href,
+});
 
 export function tbExecute(raw: string): CommandResult {
   const input = raw.trim();
@@ -35,10 +43,14 @@ export function tbExecute(raw: string): CommandResult {
         accent("available commands:"),
         ink("  help              — this menu"),
         ink("  whoami            — quick bio"),
+        ink("  about             — full bio"),
         ink("  ls                — list files"),
-        ink("  cat <file>        — print file (about.md, skills.txt, projects.md, contact.json)"),
+        ink("  cat <file>        — print file (about.md, skills.txt, projects.md, contact.json, certs.txt)"),
         ink("  experience        — career timeline"),
         ink("  projects          — featured projects"),
+        ink("  open <name>       — project details"),
+        ink("  resume            — download resume/cv"),
+        ink("  certs             — certifications"),
         ink("  skills            — tech stack"),
         ink("  contact           — how to reach me"),
         ink("  socials           — github, linkedin"),
@@ -55,6 +67,12 @@ export function tbExecute(raw: string): CommandResult {
         accent("moin@portfolio"),
         ink("Full-stack dev · SDE @ BrowserStack · Pune, IN"),
       );
+
+    case "about":
+      return {
+        kind: "lines",
+        lines: TB_FS["about.md"].split("\n").map((t) => ink(t || " ")),
+      };
 
     case "ls": {
       const long = args.includes("-la") || args.includes("-l");
@@ -90,10 +108,53 @@ export function tbExecute(raw: string): CommandResult {
         accent("╰──────────────────────────────────────╯"),
       );
 
-    case "projects":
+    case "projects": {
+      const projectLines: TerminalLine[] = [accent("featured projects:")];
+      projects.forEach((p) => {
+        const num = String(p.num).padStart(2, "0");
+        projectLines.push(ink(`  ${num}  ${p.name} — ${p.kind}`));
+      });
+      projectLines.push(dim(""));
+      projectLines.push(dim("  tip: open <name> for details"));
+      return { kind: "lines", lines: projectLines };
+    }
+
+    case "open": {
+      if (!arg) return lines(mag("open: missing project name"));
+      const match = projects.find(
+        (p) => p.name.toLowerCase() === arg.toLowerCase(),
+      );
+      if (!match) {
+        return lines(mag(`open: no such project '${arg}'`));
+      }
+      const detail: TerminalLine[] = [
+        accent(`[ ${match.name} ]`),
+        ink(`kind      · ${match.kind}`),
+        ink(`year      · ${match.year}`),
+        ink(""),
+        ink(match.longDesc),
+        ink(""),
+        accent("stack:"),
+        ink(`  ${match.stack.join(" · ")}`),
+        ink(""),
+        accent("outcomes:"),
+        ...match.outcomes.map((o) => ink(`  · ${o}`)),
+      ];
+      return { kind: "lines", lines: detail };
+    }
+
+    case "resume":
+    case "cv":
+      return {
+        kind: "download",
+        href: profile.cvPath,
+        lines: [accent("→ downloading resume.pdf…")],
+      };
+
+    case "certs":
       return {
         kind: "lines",
-        lines: TB_FS["projects.md"].split("\n").map((t) => ink(t || " ")),
+        lines: TB_FS["certs.txt"].split("\n").map((t) => ink(t || " ")),
       };
 
     case "skills":
@@ -104,10 +165,10 @@ export function tbExecute(raw: string): CommandResult {
 
     case "contact":
       return lines(
-        amber("mail     · bhokaremoin@gmail.com"),
-        cyan("tel      · +91 8007704944"),
-        ink("github   · github.com/bhokaremoin"),
-        ink("linkedin · linkedin.com/in/moinbhokare"),
+        link(`mail     · ${profile.email}`, `mailto:${profile.email}`, "amber"),
+        link(`github   · ${profile.github}`, `https://${profile.github}`, "cyan"),
+        link(`linkedin · ${profile.linkedin}`, `https://${profile.linkedin}`, "cyan"),
+        ink(`tel      · ${profile.phone}`),
       );
 
     case "socials":
