@@ -6,12 +6,14 @@ interface Props {
 
 /** Split inline text on `**`, alternating segments become <strong>. */
 function renderInline(text: string): ReactNode[] {
-  const parts = text.split("**");
-  return parts.map((part, i) =>
-    i % 2 === 1
-      ? <strong key={i} style={{ color: "var(--ink)" }}>{part}</strong>
-      : <span key={i}>{part}</span>
-  );
+  return text
+    .split("**")
+    .map((part, i) =>
+      i % 2 === 1
+        ? <strong key={i} style={{ color: "var(--ink)" }}>{part}</strong>
+        : part,
+    )
+    .filter((part) => part !== "");
 }
 
 type Block =
