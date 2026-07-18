@@ -56,7 +56,7 @@ export function ExecutiveNav() {
               letterSpacing: 1.5,
             }}
           >
-            SDE · BROWSERSTACK
+            {profile.role.replace(" @ ", " · ").toUpperCase()}
           </div>
         </div>
       </div>

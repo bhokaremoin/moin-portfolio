@@ -454,6 +454,8 @@ function Projects() {
 // ── 5. Education & Certifications ─────────────────────────────────────────────
 
 function EducationAndCerts() {
+  // The education record lives as the final entry of the experience timeline.
+  const edu = experience[experience.length - 1];
   return (
     <ResumeSection eyebrow="05" label="Education & Certifications">
       {/* Education row */}
@@ -475,7 +477,7 @@ function EducationAndCerts() {
               letterSpacing: 1.5,
             }}
           >
-            2020 — 2024
+            {edu.when}
           </div>
           <div
             style={{
@@ -486,7 +488,7 @@ function EducationAndCerts() {
               letterSpacing: 1,
             }}
           >
-            Pune, IN
+            {edu.location}
           </div>
         </div>
         <div>
@@ -499,7 +501,7 @@ function EducationAndCerts() {
               marginBottom: 4,
             }}
           >
-            B.Tech, Computer Science
+            {edu.role}
           </div>
           <div
             style={{
@@ -508,7 +510,7 @@ function EducationAndCerts() {
               color: "var(--body)",
             }}
           >
-            IIIT Pune — {profile.education}
+            {edu.company} — {profile.education}
           </div>
         </div>
       </div>
