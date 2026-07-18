@@ -117,12 +117,14 @@ export function getFile(id: FileId): FileMeta {
       // project file: `projects/<slug>.md`
       const slug = (id as string).replace(/^projects\//, "").replace(/\.md$/, "");
       const project = projects.find((p) => toSlug(p.name) === slug);
-      const name = project?.name ?? slug;
+      if (!project) {
+        throw new Error(`file-registry: unknown file id "${id}"`);
+      }
       return {
         id,
         label: id as string,
         lang: "markdown",
-        source: projectMarkdown(name),
+        source: projectMarkdown(project.name),
         preview: "project",
       };
     }
