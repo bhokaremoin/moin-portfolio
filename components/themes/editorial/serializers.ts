@@ -30,7 +30,7 @@ export function skillsYaml(): string {
   for (const bucket of skills) {
     lines.push(`${bucket.label.toLowerCase()}:`);
     for (const item of bucket.items) {
-      lines.push(`  - name: ${item.name}`);
+      lines.push(`  - ${item.name}`);
     }
   }
   return lines.join("\n");

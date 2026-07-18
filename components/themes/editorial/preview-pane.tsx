@@ -3,17 +3,11 @@
 import { ReactNode } from "react";
 import { profile, projects, skills } from "@/lib/portfolio-data";
 import { Markdown } from "./markdown";
-import { type FileId, getFile } from "./file-registry";
+import { type FileId, getFile, toSlug, findProjectBySlug } from "./file-registry";
 
 const mono = "var(--font-mono)";
 const serif = "var(--font-serif)";
 const sans = "var(--font-sans)";
-
-// --- helpers ---
-
-function toSlug(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, "-");
-}
 
 // --- JSON preview ---
 
@@ -211,7 +205,7 @@ function SkillsPreview(): ReactNode {
 
 function ProjectPreview({ file }: { file: ReturnType<typeof getFile> }): ReactNode {
   const slug = (file.id as string).replace(/^projects\//, "").replace(/\.md$/, "");
-  const project = projects.find((p) => toSlug(p.name) === slug);
+  const project = findProjectBySlug(slug);
 
   if (!project) {
     return <Markdown source={file.source} />;

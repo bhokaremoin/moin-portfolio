@@ -1,4 +1,4 @@
-import { projects } from "@/lib/portfolio-data";
+import { projects, type Project } from "@/lib/portfolio-data";
 import {
   aboutMarkdown,
   experienceJson,
@@ -24,8 +24,12 @@ export type FileId = FixedFileId | ProjectSlug;
 
 // --- helpers ---
 
-function toSlug(name: string): string {
+export function toSlug(name: string): string {
   return name.toLowerCase().replace(/\s+/g, "-");
+}
+
+export function findProjectBySlug(slug: string): Project | undefined {
+  return projects.find((p) => toSlug(p.name) === slug);
 }
 
 // --- FILE_ORDER ---
@@ -116,7 +120,7 @@ export function getFile(id: FileId): FileMeta {
     default: {
       // project file: `projects/<slug>.md`
       const slug = (id as string).replace(/^projects\//, "").replace(/\.md$/, "");
-      const project = projects.find((p) => toSlug(p.name) === slug);
+      const project = findProjectBySlug(slug);
       if (!project) {
         throw new Error(`file-registry: unknown file id "${id}"`);
       }

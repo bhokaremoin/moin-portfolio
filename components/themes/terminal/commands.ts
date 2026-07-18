@@ -173,8 +173,8 @@ export function tbExecute(raw: string): CommandResult {
 
     case "socials":
       return lines(
-        cyan("→ github.com/bhokaremoin"),
-        cyan("→ linkedin.com/in/moinbhokare"),
+        cyan(`→ ${profile.github}`),
+        cyan(`→ ${profile.linkedin}`),
       );
 
     case "echo":
