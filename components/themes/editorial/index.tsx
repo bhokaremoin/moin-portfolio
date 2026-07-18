@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { type FileId, getFile } from "./file-registry";
 import { type ViewMode, TitleBar, TabStrip, StatusBar } from "./chrome";
 import { Explorer } from "./explorer";
@@ -8,24 +8,27 @@ import { EditorPane } from "./editor-pane";
 import { PreviewPane } from "./preview-pane";
 
 // --- SSR-safe narrow-viewport hook ---
+//
+// useSyncExternalStore keeps hydration safe: the server snapshot is always
+// `false`, so the first client render matches the server HTML, and React then
+// switches to the live matchMedia value after hydration — no mismatch warning,
+// and no setState-in-effect.
 
-function getIsNarrow(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(max-width: 819px)").matches;
+const NARROW_QUERY = "(max-width: 819px)";
+
+function subscribeNarrow(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const mq = window.matchMedia(NARROW_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getNarrowSnapshot(): boolean {
+  return window.matchMedia(NARROW_QUERY).matches;
 }
 
 function useIsNarrow(): boolean {
-  const [narrow, setNarrow] = useState<boolean>(getIsNarrow);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 819px)");
-    const handler = (e: MediaQueryListEvent) => setNarrow(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  return narrow;
+  return useSyncExternalStore(subscribeNarrow, getNarrowSnapshot, () => false);
 }
 
 // --- neighbor pick for tab close ---
