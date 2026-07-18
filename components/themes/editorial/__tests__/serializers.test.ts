@@ -21,4 +21,9 @@ describe("serializers", () => {
   it("project markdown includes the project name", () => {
     expect(projectMarkdown("GPTForVideo")).toMatch(/GPTForVideo/);
   });
+  it("certifications markdown has a heading and bold titles", () => {
+    const md = certificationsMarkdown();
+    expect(md).toMatch(/^# Certifications/m);
+    expect(md).toMatch(/- \*\*/);
+  });
 });
