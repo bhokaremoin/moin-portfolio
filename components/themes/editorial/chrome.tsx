@@ -159,9 +159,7 @@ export function TabStrip({
               />
               {meta.label}
               <span
-                role="button"
-                aria-label={`Close ${meta.label}`}
-                tabIndex={-1}
+                aria-hidden
                 onClick={(e) => {
                   e.stopPropagation();
                   onClose(id);

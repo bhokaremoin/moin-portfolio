@@ -72,11 +72,7 @@ function JsonObject({ obj }: { obj: Record<string, unknown> }): ReactNode {
           </span>
           <span style={{ fontFamily: mono, fontSize: 12, color: "var(--syntax-com)" }}>:</span>
           <span style={{ fontFamily: mono, fontSize: 12 }}>
-            {typeof v === "object" && v !== null ? (
-              <JsonValue value={v} />
-            ) : (
-              <JsonValue value={v} />
-            )}
+            <JsonValue value={v} />
           </span>
         </div>
       ))}
