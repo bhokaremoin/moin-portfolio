@@ -9,8 +9,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTheme } from "@/components/theme-provider";
-import { isThemeId, profile } from "@/lib/portfolio-data";
+import { profile } from "@/lib/portfolio-data";
+import { RESUME_URL } from "@/lib/routes";
 import {
   COLOR_VAR,
   TerminalLine,
@@ -52,7 +52,6 @@ function trim(items: HistoryItem[]): HistoryItem[] {
 }
 
 export function TerminalShell() {
-  const { setTheme } = useTheme();
   const [history, setHistory] = useState<HistoryItem[]>(makeIntro);
   const [input, setInput] = useState("");
   const [past, setPast] = useState<string[]>([]);
@@ -68,34 +67,33 @@ export function TerminalShell() {
     }
   }, [history]);
 
-  const handleThemeCommand = useCallback(
-    (target: string): HistoryItem => {
-      if (!target) {
-        return {
-          kind: "out",
-          lines: [
-            { color: "mag", text: "theme: missing argument" },
-            { color: "dim", text: "usage: theme <terminal | executive | editorial>" },
-          ],
-        };
-      }
-      if (!isThemeId(target)) {
-        return {
-          kind: "out",
-          lines: [
-            { color: "mag", text: `theme: unknown theme '${target}'` },
-            { color: "dim", text: "available: terminal, executive, editorial" },
-          ],
-        };
-      }
-      setTheme(target);
+  const handleThemeCommand = useCallback((target: string): HistoryItem => {
+    if (target === "terminal") {
       return {
         kind: "out",
-        lines: [{ color: "accent", text: `→ switching to ${target}…` }],
+        lines: [{ color: "dim", text: "already in the terminal view." }],
       };
-    },
-    [setTheme],
-  );
+    }
+    if (target === "executive" || target === "resume") {
+      // Navigate to the résumé experience (guard for jsdom which lacks navigation).
+      try {
+        if (typeof window !== "undefined") window.location.assign(RESUME_URL);
+      } catch {
+        // restricted env — ignore
+      }
+      return {
+        kind: "out",
+        lines: [{ color: "accent", text: "→ opening résumé view…" }],
+      };
+    }
+    return {
+      kind: "out",
+      lines: [
+        { color: "mag", text: target ? `theme: unknown view '${target}'` : "theme: missing argument" },
+        { color: "dim", text: "usage: theme <terminal | executive>" },
+      ],
+    };
+  }, []);
 
   const run = useCallback(
     (raw: string) => {

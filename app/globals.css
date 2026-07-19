@@ -65,27 +65,6 @@
   color-scheme: light;
 }
 
-[data-theme="editorial"] {
-  --bg: #0e1116;
-  --panel: #151a21;
-  --panel-2: #1a2029;
-  --ink: #e6edf3;
-  --dim: #8b949e;
-  --dim-faint: #6a737d;
-  --line: #21262d;
-  --accent: #f0b429;
-  --amber: #f0b429;
-  --cyan: #79c0ff;
-  --mag: #ff7b72;
-  --ok: #7ee787;
-  --syntax-key: #ff7b72;
-  --syntax-str: #a5d6ff;
-  --syntax-fn: #d2a8ff;
-  --syntax-num: #79c0ff;
-  --syntax-com: #8b949e;
-  color-scheme: dark;
-}
-
 html,
 body {
   margin: 0;

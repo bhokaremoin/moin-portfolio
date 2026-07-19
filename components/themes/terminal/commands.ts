@@ -54,7 +54,7 @@ export function tbExecute(raw: string): CommandResult {
         ink("  skills            — tech stack"),
         ink("  contact           — how to reach me"),
         ink("  socials           — github, linkedin"),
-        ink("  theme <id>        — switch theme (terminal | executive | editorial)"),
+        ink("  theme <id>        — switch view (terminal | executive)"),
         ink("  echo <text>       — repeat text"),
         ink("  date              — current date/time"),
         ink("  neofetch          — system info"),

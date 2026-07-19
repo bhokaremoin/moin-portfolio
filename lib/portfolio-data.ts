@@ -1,10 +1,5 @@
-export const THEME_IDS = ["terminal", "executive", "editorial"] as const;
+export const THEME_IDS = ["terminal", "executive"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
-
-export const DEFAULT_THEME: ThemeId = "terminal";
-export const THEME_STORAGE_KEY = "portfolio_theme" as const;
-export const THEME_COOKIE_KEY = "portfolio_theme" as const;
-export const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export function isThemeId(value: unknown): value is ThemeId {
   return typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);
@@ -29,12 +24,6 @@ export const PALETTES: Record<ThemeId, ThemePalette> = {
     accent: "#c84a1a",
     label: "Executive",
     hint: "editorial · stakeholder",
-  },
-  editorial: {
-    bg: "#0e1116",
-    accent: "#f0b429",
-    label: "Code IDE",
-    hint: "syntax · refined",
   },
 };
 

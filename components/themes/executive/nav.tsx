@@ -1,4 +1,5 @@
 import { profile } from "@/lib/portfolio-data";
+import { CLI_URL } from "@/lib/routes";
 
 const serif = "var(--font-serif)";
 const sans = "var(--font-sans)";
@@ -10,7 +11,7 @@ export function ExecutiveNav() {
       style={{
         display: "flex",
         alignItems: "center",
-        padding: "22px 210px 22px 64px",
+        padding: "22px 64px",
         borderBottom: "1px solid var(--line-soft)",
         background: "var(--bg)",
         position: "sticky",
@@ -76,10 +77,28 @@ export function ExecutiveNav() {
         ))}
       </nav>
       <a
+        href={CLI_URL}
+        style={{
+          marginLeft: 32,
+          padding: "8px 16px",
+          background: "transparent",
+          color: "var(--ink)",
+          border: "1px solid var(--line)",
+          textDecoration: "none",
+          fontFamily: mono,
+          fontSize: 12,
+          fontWeight: 500,
+          borderRadius: 999,
+          letterSpacing: 0.5,
+        }}
+      >
+        CLI view →
+      </a>
+      <a
         href={profile.cvPath}
         download
         style={{
-          marginLeft: 32,
+          marginLeft: 12,
           padding: "8px 16px",
           background: "var(--ink)",
           color: "#fff",

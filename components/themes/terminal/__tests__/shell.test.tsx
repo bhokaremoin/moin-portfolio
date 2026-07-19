@@ -2,14 +2,9 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TerminalShell } from "@/components/themes/terminal/shell";
-import { ThemeProvider } from "@/components/theme-provider";
 
 function renderShell() {
-  return render(
-    <ThemeProvider initialTheme="terminal">
-      <TerminalShell />
-    </ThemeProvider>,
-  );
+  return render(<TerminalShell />);
 }
 
 describe("TerminalShell", () => {
