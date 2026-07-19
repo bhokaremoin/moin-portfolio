@@ -87,7 +87,7 @@ export function TerminalShell() {
       const trimmed = raw.trim();
       const cmdItem: HistoryItem = { kind: "cmd", input: raw };
 
-      if (trimmed.startsWith("theme")) {
+      if (trimmed === "theme" || trimmed.startsWith("theme ")) {
         const target = trimmed.replace(/^theme\s*/, "").trim();
         const out = handleThemeCommand(target);
         setHistory((h) => trim([...h, cmdItem, out]));

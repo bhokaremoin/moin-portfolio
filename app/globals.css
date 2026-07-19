@@ -18,19 +18,24 @@
 }
 
 :root {
-  /* Catppuccin Mocha */
-  --bg: #1e1e2e;
-  --panel: #181825;
-  --ink: #cdd6f4;
-  --dim: #a6adc8;
-  --dim-faint: #6c7086;
-  --line: #313244;
-  --accent: #a6e3a1;
-  --amber: #fab387;
-  --cyan: #89dceb;
-  --mag: #f38ba8;
-  --ok: #a6e3a1;
-  color-scheme: dark;
+  /* Default document palette = executive (light), since `/` serves the résumé.
+     The terminal route overrides these via [data-theme="terminal"]. This keeps
+     the root scrollbar / overscroll gutter matching the light résumé page. */
+  --bg: #fafaf7;
+  --panel: #ffffff;
+  --ink: #0c0d0f;
+  --body: #3a3d42;
+  --dim: #6b7079;
+  --dim-faint: #a4a8b0;
+  --line: #e5e3dd;
+  --line-soft: #efece6;
+  --accent: #c84a1a;
+  --brand-soft: #fbe9df;
+  --amber: #c84a1a;
+  --cyan: #1a1a1a;
+  --mag: #c84a1a;
+  --ok: #1f7a3a;
+  color-scheme: light;
 }
 
 [data-theme="terminal"] {

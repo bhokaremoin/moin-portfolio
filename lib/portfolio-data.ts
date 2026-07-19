@@ -1,32 +1,3 @@
-export const THEME_IDS = ["terminal", "executive"] as const;
-export type ThemeId = (typeof THEME_IDS)[number];
-
-export function isThemeId(value: unknown): value is ThemeId {
-  return typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);
-}
-
-export interface ThemePalette {
-  bg: string;
-  accent: string;
-  label: string;
-  hint: string;
-}
-
-export const PALETTES: Record<ThemeId, ThemePalette> = {
-  terminal: {
-    bg: "#05070a",
-    accent: "#7aff9c",
-    label: "Terminal",
-    hint: "monospace · phosphor",
-  },
-  executive: {
-    bg: "#fafaf7",
-    accent: "#c84a1a",
-    label: "Executive",
-    hint: "editorial · stakeholder",
-  },
-};
-
 export const profile = {
   name: "Moin Bhokare",
   initial: "M",

@@ -7,6 +7,10 @@
 //   NEXT_PUBLIC_CLI_URL=https://resume-cli.yourdomain.com
 // The middleware also maps a `resume-cli.*` host to the terminal route, so the
 // CLI subdomain root serves the terminal experience without any path.
+//
+// For the in-page toggle to cross subdomains, BOTH vars must be set on BOTH
+// hosts (or on the single shared deployment). If only one is set, a toggle can
+// resolve to a relative path on the wrong host.
 
 export const RESUME_URL = process.env.NEXT_PUBLIC_RESUME_URL || "/";
 export const CLI_URL = process.env.NEXT_PUBLIC_CLI_URL || "/terminal";
