@@ -9,13 +9,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTheme } from "@/components/theme-provider";
-import { isThemeId } from "@/lib/portfolio-data";
+import { RESUME_URL } from "@/lib/routes";
 import {
   COLOR_VAR,
   TerminalLine,
   tbExecute,
 } from "./commands";
+import { CommandChips } from "./command-chips";
+import { TerminalIntro } from "./intro";
 
 interface HistoryItem {
   kind: "sys" | "cmd" | "out";
@@ -25,13 +26,6 @@ interface HistoryItem {
 
 const MAX_SCROLLBACK = 200;
 const MAX_HISTORY = 50;
-const INTRO: HistoryItem = {
-  kind: "sys",
-  lines: [
-    { color: "accent", text: "moin-shell v1.0 — type 'help' to begin" },
-    { color: "dim", text: "try: whoami, ls, cat about.md, projects, neofetch" },
-  ],
-};
 
 function trim(items: HistoryItem[]): HistoryItem[] {
   if (items.length <= MAX_SCROLLBACK) return items;
@@ -39,13 +33,14 @@ function trim(items: HistoryItem[]): HistoryItem[] {
 }
 
 export function TerminalShell() {
-  const { setTheme } = useTheme();
-  const [history, setHistory] = useState<HistoryItem[]>([INTRO]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [introVisible, setIntroVisible] = useState(true);
   const [input, setInput] = useState("");
   const [past, setPast] = useState<string[]>([]);
   const [pi, setPi] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const downloadRef = useRef<HTMLAnchorElement>(null);
   const labelId = useId();
 
   useLayoutEffect(() => {
@@ -54,63 +49,95 @@ export function TerminalShell() {
     }
   }, [history]);
 
-  const handleThemeCommand = useCallback(
-    (target: string): HistoryItem => {
-      if (!target) {
-        return {
-          kind: "out",
-          lines: [
-            { color: "mag", text: "theme: missing argument" },
-            { color: "dim", text: "usage: theme <terminal | executive | editorial>" },
-          ],
-        };
-      }
-      if (!isThemeId(target)) {
-        return {
-          kind: "out",
-          lines: [
-            { color: "mag", text: `theme: unknown theme '${target}'` },
-            { color: "dim", text: "available: terminal, executive, editorial" },
-          ],
-        };
-      }
-      setTheme(target);
+  const handleThemeCommand = useCallback((target: string): HistoryItem => {
+    if (target === "terminal") {
       return {
         kind: "out",
-        lines: [{ color: "accent", text: `→ switching to ${target}…` }],
+        lines: [{ color: "dim", text: "already in the terminal view." }],
       };
+    }
+    if (target === "executive" || target === "resume") {
+      // Navigate to the résumé experience (guard for jsdom which lacks navigation).
+      try {
+        if (typeof window !== "undefined") window.location.assign(RESUME_URL);
+      } catch {
+        // restricted env — ignore
+      }
+      return {
+        kind: "out",
+        lines: [{ color: "accent", text: "→ opening résumé view…" }],
+      };
+    }
+    return {
+      kind: "out",
+      lines: [
+        { color: "mag", text: target ? `theme: unknown view '${target}'` : "theme: missing argument" },
+        { color: "dim", text: "usage: theme <terminal | executive>" },
+      ],
+    };
+  }, []);
+
+  const clearTerminal = useCallback(() => {
+    setHistory([]);
+    setIntroVisible(false);
+  }, []);
+
+  const run = useCallback(
+    (raw: string) => {
+      const trimmed = raw.trim();
+      const cmdItem: HistoryItem = { kind: "cmd", input: raw };
+
+      if (trimmed === "theme" || trimmed.startsWith("theme ")) {
+        const target = trimmed.replace(/^theme\s*/, "").trim();
+        const out = handleThemeCommand(target);
+        setHistory((h) => trim([...h, cmdItem, out]));
+      } else {
+        const result = tbExecute(raw);
+        if (result.kind === "clear") {
+          clearTerminal();
+        } else if (result.kind === "download") {
+          setHistory((h) =>
+            trim([...h, cmdItem, { kind: "out", lines: result.lines }]),
+          );
+          // Trigger download via hidden anchor (guard for jsdom which lacks navigation)
+          try {
+            if (downloadRef.current) {
+              downloadRef.current.href = result.href;
+              downloadRef.current.click();
+            } else if (typeof window !== "undefined" && window.location) {
+              window.location.assign(result.href);
+            }
+          } catch {
+            // jsdom or restricted env — silently skip
+          }
+        } else {
+          setHistory((h) =>
+            trim([...h, cmdItem, { kind: "out", lines: result.lines }]),
+          );
+        }
+      }
+
+      if (trimmed) {
+        setPast((p) => [trimmed, ...p].slice(0, MAX_HISTORY));
+      }
+      setPi(-1);
+      setInput("");
     },
-    [setTheme],
+    [handleThemeCommand, clearTerminal],
   );
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const raw = input;
-    const trimmed = raw.trim();
-
-    if (trimmed.startsWith("theme")) {
-      const target = trimmed.replace(/^theme\s*/, "").trim();
-      const out = handleThemeCommand(target);
-      setHistory((h) => trim([...h, { kind: "cmd", input: raw }, out]));
-    } else {
-      const out = tbExecute(raw);
-      if (out.kind === "clear") {
-        setHistory([]);
-      } else {
-        setHistory((h) =>
-          trim([...h, { kind: "cmd", input: raw }, { kind: "out", lines: out.lines }]),
-        );
-      }
-    }
-
-    if (trimmed) {
-      setPast((p) => [trimmed, ...p].slice(0, MAX_HISTORY));
-    }
-    setPi(-1);
-    setInput("");
+    run(input);
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Cmd+K (mac) / Ctrl+K — clear the terminal, like iTerm/Terminal.app
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      clearTerminal();
+      return;
+    }
     if (e.key === "ArrowUp") {
       e.preventDefault();
       const next = Math.min(pi + 1, past.length - 1);
@@ -131,91 +158,95 @@ export function TerminalShell() {
     }
   };
 
+  const promptLabel = (
+    <>
+      <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
+      <span style={{ color: "var(--dim)" }}>:</span>
+      <span style={{ color: "var(--cyan)" }}>~</span>
+      <span style={{ color: "var(--dim)", marginRight: 8 }}> $</span>
+    </>
+  );
+
   return (
-    <section aria-label="Interactive shell">
+    <section
+      aria-label="Interactive shell"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "var(--bg)",
+      }}
+    >
+      {/* Hidden anchor for programmatic downloads */}
+      <a ref={downloadRef} download aria-hidden style={{ display: "none" }} />
+
+      {/* Terminal buffer: content is top-aligned; the prompt is the last line,
+          exactly like a real shell — it starts near the top and flows down. */}
       <div
+        ref={scrollRef}
         onClick={() => inputRef.current?.focus()}
         style={{
-          border: "1px solid var(--line)",
-          background: "#03060a",
+          flex: 1,
+          minHeight: 0,
+          overflow: "auto",
+          padding: "14px 18px",
+          fontFamily: "var(--font-mono)",
+          fontSize: 13,
+          lineHeight: 1.7,
           cursor: "text",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 12px",
-            borderBottom: "1px solid var(--line)",
-            fontSize: 11,
-            color: "var(--dim)",
-            fontFamily: "var(--font-mono)",
-          }}
-        >
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: "#ff5f56" }} aria-hidden />
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: "#ffbd2e" }} aria-hidden />
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: "#27c93f" }} aria-hidden />
-          <span style={{ marginLeft: 12 }}>moin-shell — interactive</span>
-          <span style={{ marginLeft: "auto", color: "var(--accent)" }}>● live</span>
-        </div>
-
-        <div
-          ref={scrollRef}
-          role="log"
-          aria-live="polite"
-          aria-atomic="false"
-          aria-label="Terminal output"
-          style={{
-            height: 360,
-            overflow: "auto",
-            padding: "14px 18px 0",
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            lineHeight: 1.7,
-          }}
-        >
+        <div role="log" aria-live="polite" aria-atomic="false" aria-label="Terminal output">
+          {introVisible && <TerminalIntro />}
           {history.map((h, i) => {
             if (h.kind === "cmd") {
               return (
-                <div key={i} style={{ color: "var(--ink)" }}>
-                  <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
-                  <span style={{ color: "var(--dim)" }}>:</span>
-                  <span style={{ color: "var(--cyan)" }}>~</span>
-                  <span style={{ color: "var(--dim)" }}> $ </span>
+                <div
+                  key={i}
+                  style={{ color: "var(--ink)", marginTop: i === 0 ? 0 : 14 }}
+                >
+                  {promptLabel}
                   <span>{h.input}</span>
                 </div>
               );
             }
-            return (h.lines ?? []).map((ln, j) => (
-              <div
-                key={`${i}-${j}`}
-                style={{ color: COLOR_VAR[ln.color], whiteSpace: "pre" }}
-              >
-                {ln.text}
-              </div>
-            ));
+            return (h.lines ?? []).map((ln, j) =>
+              ln.href ? (
+                <div
+                  key={`${i}-${j}`}
+                  style={{ color: COLOR_VAR[ln.color], whiteSpace: "pre" }}
+                >
+                  <a
+                    href={ln.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    style={{
+                      color: "inherit",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 2,
+                    }}
+                  >
+                    {ln.text}
+                  </a>
+                </div>
+              ) : (
+                <div
+                  key={`${i}-${j}`}
+                  style={{ color: COLOR_VAR[ln.color], whiteSpace: "pre" }}
+                >
+                  {ln.text}
+                </div>
+              ),
+            );
           })}
         </div>
 
-        <form
-          onSubmit={submit}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "4px 18px 14px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            lineHeight: 1.7,
-          }}
-        >
+        {/* Live prompt — inline, as the last line of the buffer */}
+        <form onSubmit={submit} style={{ display: "flex", alignItems: "center" }}>
           <label htmlFor={labelId} className="sr-only">
             Terminal input — type a command and press Enter
           </label>
-          <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
-          <span style={{ color: "var(--dim)" }}>:</span>
-          <span style={{ color: "var(--cyan)" }}>~</span>
-          <span style={{ color: "var(--dim)", marginRight: 8 }}> $</span>
+          {promptLabel}
           <input
             id={labelId}
             ref={inputRef}
@@ -224,6 +255,7 @@ export function TerminalShell() {
             onKeyDown={onKey}
             spellCheck={false}
             autoComplete="off"
+            autoFocus
             style={{
               flex: 1,
               background: "transparent",
@@ -237,6 +269,9 @@ export function TerminalShell() {
           />
         </form>
       </div>
+
+      {/* Quick-command helper bar (not part of the buffer) */}
+      <CommandChips onRun={run} />
     </section>
   );
 }

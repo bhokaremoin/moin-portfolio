@@ -1,48 +1,9 @@
-export const THEME_IDS = ["terminal", "executive", "editorial"] as const;
-export type ThemeId = (typeof THEME_IDS)[number];
-
-export const DEFAULT_THEME: ThemeId = "terminal";
-export const THEME_STORAGE_KEY = "portfolio_theme" as const;
-export const THEME_COOKIE_KEY = "portfolio_theme" as const;
-export const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
-
-export function isThemeId(value: unknown): value is ThemeId {
-  return typeof value === "string" && (THEME_IDS as readonly string[]).includes(value);
-}
-
-export interface ThemePalette {
-  bg: string;
-  accent: string;
-  label: string;
-  hint: string;
-}
-
-export const PALETTES: Record<ThemeId, ThemePalette> = {
-  terminal: {
-    bg: "#05070a",
-    accent: "#7aff9c",
-    label: "Terminal",
-    hint: "monospace · phosphor",
-  },
-  executive: {
-    bg: "#fafaf7",
-    accent: "#c84a1a",
-    label: "Executive",
-    hint: "editorial · stakeholder",
-  },
-  editorial: {
-    bg: "#0e1116",
-    accent: "#f0b429",
-    label: "Code IDE",
-    hint: "syntax · refined",
-  },
-};
-
 export const profile = {
   name: "Moin Bhokare",
   initial: "M",
   role: "SDE @ BrowserStack",
   shortRole: "Full Stack Developer",
+  stackSummary: "TypeScript · React · Node · Docker",
   location: "Pune, IN",
   education: "B.Tech, IIIT Pune '24",
   educationShort: "BTech, IIIT Pune '24",

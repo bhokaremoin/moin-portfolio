@@ -1,5 +1,5 @@
-import { ThemedPortfolio } from "@/components/themed-portfolio";
+import ExecutivePortfolio from "@/components/themes/executive";
 
 export default function Home() {
-  return <ThemedPortfolio />;
+  return <ExecutivePortfolio />;
 }

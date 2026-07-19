@@ -18,32 +18,39 @@
 }
 
 :root {
-  --bg: #05070a;
-  --panel: #0b0f14;
-  --ink: #c7d2cc;
-  --dim: #7a8b85;
-  --dim-faint: #5a6b66;
-  --line: #1a2028;
-  --accent: #7aff9c;
-  --amber: #ffb454;
-  --cyan: #7adfff;
-  --mag: #ff5d8f;
-  --ok: #7aff9c;
-  color-scheme: dark;
+  /* Default document palette = executive (light), since `/` serves the résumé.
+     The terminal route overrides these via [data-theme="terminal"]. This keeps
+     the root scrollbar / overscroll gutter matching the light résumé page. */
+  --bg: #fafaf7;
+  --panel: #ffffff;
+  --ink: #0c0d0f;
+  --body: #3a3d42;
+  --dim: #6b7079;
+  --dim-faint: #a4a8b0;
+  --line: #e5e3dd;
+  --line-soft: #efece6;
+  --accent: #c84a1a;
+  --brand-soft: #fbe9df;
+  --amber: #c84a1a;
+  --cyan: #1a1a1a;
+  --mag: #c84a1a;
+  --ok: #1f7a3a;
+  color-scheme: light;
 }
 
 [data-theme="terminal"] {
-  --bg: #05070a;
-  --panel: #0b0f14;
-  --ink: #c7d2cc;
-  --dim: #7a8b85;
-  --dim-faint: #5a6b66;
-  --line: #1a2028;
-  --accent: #7aff9c;
-  --amber: #ffb454;
-  --cyan: #7adfff;
-  --mag: #ff5d8f;
-  --ok: #7aff9c;
+  /* Catppuccin Mocha */
+  --bg: #1e1e2e;
+  --panel: #181825;
+  --ink: #cdd6f4;
+  --dim: #a6adc8;
+  --dim-faint: #6c7086;
+  --line: #313244;
+  --accent: #a6e3a1;
+  --amber: #fab387;
+  --cyan: #89dceb;
+  --mag: #f38ba8;
+  --ok: #a6e3a1;
   color-scheme: dark;
 }
 
@@ -63,27 +70,6 @@
   --mag: #c84a1a;
   --ok: #1f7a3a;
   color-scheme: light;
-}
-
-[data-theme="editorial"] {
-  --bg: #0e1116;
-  --panel: #151a21;
-  --panel-2: #1a2029;
-  --ink: #e6edf3;
-  --dim: #8b949e;
-  --dim-faint: #6a737d;
-  --line: #21262d;
-  --accent: #f0b429;
-  --amber: #f0b429;
-  --cyan: #79c0ff;
-  --mag: #ff7b72;
-  --ok: #7ee787;
-  --syntax-key: #ff7b72;
-  --syntax-str: #a5d6ff;
-  --syntax-fn: #d2a8ff;
-  --syntax-num: #79c0ff;
-  --syntax-com: #8b949e;
-  color-scheme: dark;
 }
 
 html,
