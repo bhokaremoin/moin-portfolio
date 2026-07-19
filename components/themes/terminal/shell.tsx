@@ -77,6 +77,11 @@ export function TerminalShell() {
     };
   }, []);
 
+  const clearTerminal = useCallback(() => {
+    setHistory([]);
+    setIntroVisible(false);
+  }, []);
+
   const run = useCallback(
     (raw: string) => {
       const trimmed = raw.trim();
@@ -89,8 +94,7 @@ export function TerminalShell() {
       } else {
         const result = tbExecute(raw);
         if (result.kind === "clear") {
-          setHistory([]);
-          setIntroVisible(false);
+          clearTerminal();
         } else if (result.kind === "download") {
           setHistory((h) =>
             trim([...h, cmdItem, { kind: "out", lines: result.lines }]),
@@ -119,7 +123,7 @@ export function TerminalShell() {
       setPi(-1);
       setInput("");
     },
-    [handleThemeCommand],
+    [handleThemeCommand, clearTerminal],
   );
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -128,6 +132,12 @@ export function TerminalShell() {
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Cmd+K (mac) / Ctrl+K — clear the terminal, like iTerm/Terminal.app
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      clearTerminal();
+      return;
+    }
     if (e.key === "ArrowUp") {
       e.preventDefault();
       const next = Math.min(pi + 1, past.length - 1);
@@ -164,7 +174,7 @@ export function TerminalShell() {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#03060a",
+        background: "var(--bg)",
       }}
     >
       {/* Hidden anchor for programmatic downloads */}
@@ -191,7 +201,10 @@ export function TerminalShell() {
           {history.map((h, i) => {
             if (h.kind === "cmd") {
               return (
-                <div key={i} style={{ color: "var(--ink)" }}>
+                <div
+                  key={i}
+                  style={{ color: "var(--ink)", marginTop: i === 0 ? 0 : 14 }}
+                >
                   {promptLabel}
                   <span>{h.input}</span>
                 </div>

@@ -45,7 +45,7 @@ export function TerminalIntro() {
             lineHeight: 1.15,
             whiteSpace: "pre",
             textShadow:
-              "0 0 8px rgba(122,255,156,0.35), 0 0 20px rgba(122,255,156,0.15)",
+              "0 0 8px rgba(166,227,161,0.35), 0 0 20px rgba(166,227,161,0.15)",
           }}
         >
           {ASCII_MOIN}

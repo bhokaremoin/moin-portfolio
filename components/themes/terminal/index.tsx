@@ -17,7 +17,7 @@ export default function TerminalPortfolio() {
       <div
         style={{
           display: "flex", alignItems: "center", gap: 8, padding: "10px 14px",
-          borderBottom: "1px solid var(--line)", background: "#0a0d12",
+          borderBottom: "1px solid var(--line)", background: "var(--panel)",
           color: "var(--dim)", fontSize: 12, flexShrink: 0,
         }}
       >

@@ -15,7 +15,7 @@ export function CommandChips({ onRun }: { onRun: (cmd: string) => void }) {
         flexWrap: "wrap",
         padding: "10px 18px",
         borderTop: "1px solid var(--line)",
-        background: "#0a0d12",
+        background: "var(--panel)",
         flexShrink: 0,
       }}
     >
