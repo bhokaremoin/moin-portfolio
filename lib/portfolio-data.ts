@@ -32,6 +32,7 @@ export const profile = {
   initial: "M",
   role: "SDE @ BrowserStack",
   shortRole: "Full Stack Developer",
+  stackSummary: "TypeScript · React · Node · Docker",
   location: "Pune, IN",
   education: "B.Tech, IIIT Pune '24",
   educationShort: "BTech, IIIT Pune '24",

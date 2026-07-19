@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { profile } from "@/lib/portfolio-data";
 import { RESUME_URL } from "@/lib/routes";
 import {
   COLOR_VAR,
@@ -17,7 +16,7 @@ import {
   tbExecute,
 } from "./commands";
 import { CommandChips } from "./command-chips";
-import { ASCII_MOIN } from "./ascii";
+import { TerminalIntro } from "./intro";
 
 interface HistoryItem {
   kind: "sys" | "cmd" | "out";
@@ -28,31 +27,14 @@ interface HistoryItem {
 const MAX_SCROLLBACK = 200;
 const MAX_HISTORY = 50;
 
-function makeIntro(): HistoryItem[] {
-  const bannerLines: TerminalLine[] = ASCII_MOIN.split("\n").map((t) => ({
-    color: "accent" as const,
-    text: t,
-  }));
-  return [
-    {
-      kind: "sys",
-      lines: [
-        ...bannerLines,
-        { color: "dim", text: "" },
-        { color: "ink", text: `${profile.shortRole} · ${profile.location}` },
-        { color: "dim", text: "type 'help' or tap a command below" },
-      ],
-    },
-  ];
-}
-
 function trim(items: HistoryItem[]): HistoryItem[] {
   if (items.length <= MAX_SCROLLBACK) return items;
   return items.slice(items.length - MAX_SCROLLBACK);
 }
 
 export function TerminalShell() {
-  const [history, setHistory] = useState<HistoryItem[]>(makeIntro);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [introVisible, setIntroVisible] = useState(true);
   const [input, setInput] = useState("");
   const [past, setPast] = useState<string[]>([]);
   const [pi, setPi] = useState(-1);
@@ -108,6 +90,7 @@ export function TerminalShell() {
         const result = tbExecute(raw);
         if (result.kind === "clear") {
           setHistory([]);
+          setIntroVisible(false);
         } else if (result.kind === "download") {
           setHistory((h) =>
             trim([...h, cmdItem, { kind: "out", lines: result.lines }]),
@@ -170,7 +153,7 @@ export function TerminalShell() {
       <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
       <span style={{ color: "var(--dim)" }}>:</span>
       <span style={{ color: "var(--cyan)" }}>~</span>
-      <span style={{ color: "var(--dim)" }}> $ </span>
+      <span style={{ color: "var(--dim)", marginRight: 8 }}> $</span>
     </>
   );
 
@@ -204,6 +187,7 @@ export function TerminalShell() {
         }}
       >
         <div role="log" aria-live="polite" aria-atomic="false" aria-label="Terminal output">
+          {introVisible && <TerminalIntro />}
           {history.map((h, i) => {
             if (h.kind === "cmd") {
               return (

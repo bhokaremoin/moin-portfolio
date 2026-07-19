@@ -17,7 +17,8 @@ describe("TerminalShell", () => {
   it("runs a typed command", async () => {
     renderShell();
     const input = screen.getByLabelText(/type a command/i);
-    await userEvent.type(input, "whoami{enter}");
-    expect(await screen.findByText(/BrowserStack/)).toBeInTheDocument();
+    await userEvent.type(input, "echo hello-cli-world{enter}");
+    // exact match hits the command output line, not the echoed input line
+    expect(await screen.findByText("hello-cli-world")).toBeInTheDocument();
   });
 });
