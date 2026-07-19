@@ -165,72 +165,50 @@ export function TerminalShell() {
     }
   };
 
+  const promptLabel = (
+    <>
+      <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
+      <span style={{ color: "var(--dim)" }}>:</span>
+      <span style={{ color: "var(--cyan)" }}>~</span>
+      <span style={{ color: "var(--dim)" }}> $ </span>
+    </>
+  );
+
   return (
     <section
       aria-label="Interactive shell"
-      style={{ display: "flex", flexDirection: "column", height: "100%" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "#03060a",
+      }}
     >
       {/* Hidden anchor for programmatic downloads */}
       <a ref={downloadRef} download aria-hidden style={{ display: "none" }} />
 
+      {/* Terminal buffer: content is top-aligned; the prompt is the last line,
+          exactly like a real shell — it starts near the top and flows down. */}
       <div
+        ref={scrollRef}
         onClick={() => inputRef.current?.focus()}
         style={{
-          display: "flex",
-          flexDirection: "column",
           flex: 1,
           minHeight: 0,
-          border: "1px solid var(--line)",
-          background: "#03060a",
+          overflow: "auto",
+          padding: "14px 18px",
+          fontFamily: "var(--font-mono)",
+          fontSize: 13,
+          lineHeight: 1.7,
           cursor: "text",
         }}
       >
-        {/* Title bar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 12px",
-            borderBottom: "1px solid var(--line)",
-            fontSize: 11,
-            color: "var(--dim)",
-            fontFamily: "var(--font-mono)",
-            flexShrink: 0,
-          }}
-        >
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: "#ff5f56" }} aria-hidden />
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: "#ffbd2e" }} aria-hidden />
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: "#27c93f" }} aria-hidden />
-          <span style={{ marginLeft: 12 }}>moin-shell — interactive</span>
-          <span style={{ marginLeft: "auto", color: "var(--accent)" }}>● live</span>
-        </div>
-
-        {/* Scrollback */}
-        <div
-          ref={scrollRef}
-          role="log"
-          aria-live="polite"
-          aria-atomic="false"
-          aria-label="Terminal output"
-          style={{
-            flex: 1,
-            minHeight: 0,
-            overflow: "auto",
-            padding: "14px 18px 0",
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            lineHeight: 1.7,
-          }}
-        >
+        <div role="log" aria-live="polite" aria-atomic="false" aria-label="Terminal output">
           {history.map((h, i) => {
             if (h.kind === "cmd") {
               return (
                 <div key={i} style={{ color: "var(--ink)" }}>
-                  <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
-                  <span style={{ color: "var(--dim)" }}>:</span>
-                  <span style={{ color: "var(--cyan)" }}>~</span>
-                  <span style={{ color: "var(--dim)" }}> $ </span>
+                  {promptLabel}
                   <span>{h.input}</span>
                 </div>
               );
@@ -266,26 +244,12 @@ export function TerminalShell() {
           })}
         </div>
 
-        {/* Input row */}
-        <form
-          onSubmit={submit}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "4px 18px 14px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            lineHeight: 1.7,
-            flexShrink: 0,
-          }}
-        >
+        {/* Live prompt — inline, as the last line of the buffer */}
+        <form onSubmit={submit} style={{ display: "flex", alignItems: "center" }}>
           <label htmlFor={labelId} className="sr-only">
             Terminal input — type a command and press Enter
           </label>
-          <span style={{ color: "var(--accent)" }}>moin@portfolio</span>
-          <span style={{ color: "var(--dim)" }}>:</span>
-          <span style={{ color: "var(--cyan)" }}>~</span>
-          <span style={{ color: "var(--dim)", marginRight: 8 }}> $</span>
+          {promptLabel}
           <input
             id={labelId}
             ref={inputRef}
@@ -294,6 +258,7 @@ export function TerminalShell() {
             onKeyDown={onKey}
             spellCheck={false}
             autoComplete="off"
+            autoFocus
             style={{
               flex: 1,
               background: "transparent",
@@ -306,10 +271,10 @@ export function TerminalShell() {
             }}
           />
         </form>
-
-        {/* Command chips */}
-        <CommandChips onRun={run} />
       </div>
+
+      {/* Quick-command helper bar (not part of the buffer) */}
+      <CommandChips onRun={run} />
     </section>
   );
 }
